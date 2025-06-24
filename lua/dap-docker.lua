@@ -12,6 +12,15 @@ local function load_module(module_name)
 	return module
 end
 
+local function get_build_target()
+	return coroutine.create(function(dap_run_co)
+		local args = {}
+		vim.ui.input({ prompt = "Target: " }, function(input)
+			coroutine.resume(dap_run_co, input)
+		end)
+	end)
+end
+
 local function setup_dockerfile_adapter(dap, config)
 	dap.adapters.dockerfile = function(callback, client_config)
 		assert(client_config.request == "launch")
@@ -34,14 +43,22 @@ local function setup_dockerfile_adapter(dap, config)
 	end
 end
 
-local function setup_dockerfile_configuration(dap)
-	local common_debug_config = {
+local function setup_dockerfile_configuration(dap, configs)
+	local common_debug_configs = {
 		{
 			type = "dockerfile",
-			name = "Build Dockerfile",
+			name = "Build",
 			request = "launch",
 			dockerfile = "${file}",
 			contextPath = "${workspaceFolder}",
+		},
+		{
+			type = "dockerfile",
+			name = "Build (Target)",
+			request = "launch",
+			dockerfile = "${file}",
+			contextPath = "${workspaceFolder}",
+			target = get_build_target,
 		},
 	}
 
@@ -49,8 +66,18 @@ local function setup_dockerfile_configuration(dap)
 		dap.configurations.dockerfile = {}
 	end
 
-	for _, config in ipairs(common_debug_config) do
+	for _, config in ipairs(common_debug_configs) do
 		table.insert(dap.configurations.dockerfile, config)
+	end
+
+	if configs == nil or configs.dap_configurations == nil then
+		return
+	end
+
+	for _, config in ipairs(configs.dap_configurations) do
+		if config.type == "dockerfile" then
+			table.insert(dap.configurations.dockerfile, config)
+		end
 	end
 end
 
