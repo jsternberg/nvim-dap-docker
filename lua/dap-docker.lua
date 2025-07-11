@@ -3,6 +3,7 @@ local M = {}
 local default_config = {
 	docker = {
 		path = "docker",
+		standalone = false,
 	},
 }
 
@@ -37,7 +38,11 @@ local function setup_dockerfile_adapter(dap, config)
 		local envmap = vim.tbl_extend("force", vim.fn.environ(), {
 			BUILDX_EXPERIMENTAL = "1",
 		})
-		local args = { "buildx", "dap", "build" }
+
+		local args = { "dap", "build" }
+		if not config.docker.standalone then
+			table.insert(args, 1, "buildx")
+		end
 		if client_config.args then
 			vim.list_extend(args, client_config.args)
 		end

@@ -4,7 +4,7 @@ An extension for [nvim-dap][1] providing configurations for launching the docker
 
 ## Project Status
 
-This project is in its very early stages and will only work properly with code that is either not merged to master or is not part of any released version of buildx yet.
+This project is in its very early stages and its behavior and interface should be considered unstable.
 Since this plugin relies on an experimental feature of buildx, changes to this plugin may produce breaking changes.
 There are also many parts of the debug adapter protocol that have not been implemented in buildx yet.
 
@@ -16,7 +16,7 @@ There are also many parts of the debug adapter protocol that have not been imple
 
 - Neovim >= 0.11.0
 - [nvim-dap][1]
-- [docker buildx][2] >= 0.25.0
+- [docker buildx][2] >= 0.26.0 (estimated release date: July 21, 2025)
 
 ## Installation
 
@@ -43,10 +43,14 @@ The example below shows all the possible configurations:
 ```lua
 lua require('dap-docker').setup {
   -- docker configurations
-  delve = {
+  docker = {
     -- the path to the executable docker which will be used for debugging.
     -- by default, this is the "docker" executable on your PATH.
     path = "docker",
+    -- standalone should be set to true if the buildx is being invoked
+    -- directly instead of as a plugin. defaults to false.
+    -- mostly used for development.
+    standalone = false,
   },
 }
 ```
