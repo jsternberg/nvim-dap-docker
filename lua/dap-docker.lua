@@ -39,10 +39,14 @@ local function setup_dockerfile_adapter(dap, config)
 			BUILDX_EXPERIMENTAL = "1",
 		})
 
-		local args = { "dap", "build" }
+		local args = {}
 		if not config.docker.standalone then
-			table.insert(args, 1, "buildx")
+			vim.list_extend(args, { "buildx" })
 		end
+		if client_config.builder then
+			vim.list_extend(args, { "--builder", client_config.builder })
+		end
+		vim.list_extend(args, { "dap", "build" })
 		if client_config.args then
 			vim.list_extend(args, client_config.args)
 		end
